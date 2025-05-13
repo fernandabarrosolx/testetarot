@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useTarot } from '../context/TarotContext';
 
 const RevealedCard: React.FC = () => {
-  const { selectedCard, resetConsultation, startConsultation } = useTarot();
+  const { selectedCards, readingStep, proceedToNextStep } = useTarot();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isFullyRevealed, setIsFullyRevealed] = useState(false);
+  const currentCard = selectedCards[selectedCards.length - 1];
 
   useEffect(() => {
-    if (selectedCard) {
-      // Inicia a animação de flip após um pequeno delay
+    if (currentCard) {
       const flipTimer = setTimeout(() => {
         setIsFlipped(true);
       }, 500);
 
-      // Marca como totalmente revelada após a animação de flip
       const revealTimer = setTimeout(() => {
         setIsFullyRevealed(true);
       }, 1500);
@@ -23,36 +22,52 @@ const RevealedCard: React.FC = () => {
         clearTimeout(revealTimer);
       };
     }
-  }, [selectedCard]);
+  }, [currentCard]);
 
-  const handleNewReading = () => {
-    setIsFlipped(false);
-    setIsFullyRevealed(false);
-    
-    // Pequeno delay antes de resetar e iniciar nova consulta
-    setTimeout(() => {
-      resetConsultation();
-      startConsultation();
-    }, 500);
+  if (!currentCard) return null;
+
+  const getCardTitle = () => {
+    switch (readingStep) {
+      case 'first':
+        return 'Primeira carta: Situação';
+      case 'second':
+        return 'Segunda carta: Desafio';
+      case 'third':
+        return 'Terceira carta: Conselho';
+      default:
+        return '';
+    }
   };
 
-  if (!selectedCard) return null;
+  const getButtonText = () => {
+    switch (readingStep) {
+      case 'first':
+        return 'Escolher a segunda carta';
+      case 'second':
+        return 'Escolher última carta';
+      case 'third':
+        return '';
+      default:
+        return '';
+    }
+  };
 
   return (
     <div className="revealed-card-container">
+      <h2 className="card-title">{getCardTitle()}</h2>
       <div className={`revealed-card ${isFlipped ? 'flipped' : ''}`}>
         <div className="card-inner">
           <div className="card-front">
             <img
-              src={selectedCard.backImageUrl}
+              src={currentCard.card.backImageUrl}
               alt="Verso da carta de Tarot"
               className="card-image"
             />
           </div>
           <div className="card-back">
             <img
-              src={selectedCard.imageUrl}
-              alt={selectedCard.name}
+              src={currentCard.card.imageUrl}
+              alt={currentCard.card.name}
               className="card-image"
             />
           </div>
@@ -61,18 +76,21 @@ const RevealedCard: React.FC = () => {
       
       {isFullyRevealed && (
         <div className="card-info">
-          <h2 className="card-name">{selectedCard.name}</h2>
-          <p className="instruction-text">Volte para a conversa e informe o nome da carta escolhida</p>
-          <button 
-            className="new-reading-button"
-            onClick={handleNewReading}
-          >
-            Realizar outra consulta
-          </button>
+          <h2 className="card-name">{currentCard.card.name}</h2>
+          {readingStep === 'third' ? (
+            <p className="loading-text">Gerando o seu resultado...</p>
+          ) : (
+            <button 
+              className="next-card-button"
+              onClick={proceedToNextStep}
+            >
+              {getButtonText()}
+            </button>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default RevealedCard
+export default RevealedCard;

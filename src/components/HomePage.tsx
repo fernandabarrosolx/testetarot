@@ -9,7 +9,7 @@ const HomePage: React.FC = () => {
     <div className="home-page">
       <div className="home-content">
         <h1 className="title">Tarot Místico</h1>
-        <p className="subtitle">Descubra os segredos que o universo reserva para você</p>
+        <p className="subtitle">Tiragem de 3 cartas</p>
         
         <div className="icon-wrapper">
           <MoonStar size={48} className="moon-star-icon" />

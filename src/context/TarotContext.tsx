@@ -1,14 +1,15 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { shuffleArray } from '../utils/shuffle';
 import { tarotCards } from '../data/tarotData';
-import { TarotCard } from '../types/tarot';
+import { TarotCard, ReadingStep, SelectedCard } from '../types/tarot';
 
 interface TarotContextType {
   cards: TarotCard[];
-  isSelectionActive: boolean;
-  selectedCard: TarotCard | null;
+  readingStep: ReadingStep;
+  selectedCards: SelectedCard[];
   startConsultation: () => void;
   selectCard: (card: TarotCard) => void;
+  proceedToNextStep: () => void;
   resetConsultation: () => void;
 }
 
@@ -24,35 +25,63 @@ export const useTarot = () => {
 
 export const TarotProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cards, setCards] = useState<TarotCard[]>([]);
-  const [isSelectionActive, setIsSelectionActive] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<TarotCard | null>(null);
+  const [readingStep, setReadingStep] = useState<ReadingStep>('initial');
+  const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
 
   const startConsultation = useCallback(() => {
     const shuffledCards = shuffleArray([...tarotCards]);
     setCards(shuffledCards);
-    setIsSelectionActive(true);
-    setSelectedCard(null);
+    setReadingStep('first');
+    setSelectedCards([]);
   }, []);
 
   const selectCard = useCallback((card: TarotCard) => {
-    if (isSelectionActive && !selectedCard) {
-      setSelectedCard(card);
+    if (readingStep === 'first' || readingStep === 'second' || readingStep === 'third') {
+      const newCard: SelectedCard = {
+        card,
+        type: readingStep === 'first' ? 'situation' : readingStep === 'second' ? 'challenge' : 'advice',
+        title: readingStep === 'first' ? 'Situação' : readingStep === 'second' ? 'Desafio' : 'Conselho'
+      };
+      
+      setSelectedCards(prev => [...prev, newCard]);
+      
+      if (readingStep === 'third') {
+        setTimeout(() => {
+          setReadingStep('result');
+        }, 5000);
+      }
     }
-  }, [isSelectionActive, selectedCard]);
+  }, [readingStep]);
+
+  const proceedToNextStep = useCallback(() => {
+    setReadingStep(current => {
+      switch (current) {
+        case 'first':
+          return 'second';
+        case 'second':
+          return 'third';
+        default:
+          return current;
+      }
+    });
+  }, []);
 
   const resetConsultation = useCallback(() => {
-    setIsSelectionActive(false);
-    setSelectedCard(null);
+    setReadingStep('first');
+    setSelectedCards([]);
+    const shuffledCards = shuffleArray([...tarotCards]);
+    setCards(shuffledCards);
   }, []);
 
   return (
     <TarotContext.Provider 
       value={{ 
         cards, 
-        isSelectionActive, 
-        selectedCard, 
+        readingStep, 
+        selectedCards, 
         startConsultation, 
         selectCard, 
+        proceedToNextStep,
         resetConsultation 
       }}
     >
