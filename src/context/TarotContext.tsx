@@ -27,12 +27,14 @@ export const TarotProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [readingStep, setReadingStep] = useState<ReadingStep>('initial');
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
+  const [currentCard, setCurrentCard] = useState<SelectedCard | null>(null);
 
   const startConsultation = useCallback(() => {
     const shuffledCards = shuffleArray([...tarotCards]);
     setCards(shuffledCards);
     setReadingStep('first');
     setSelectedCards([]);
+    setCurrentCard(null);
   }, []);
 
   const selectCard = useCallback((card: TarotCard) => {
@@ -43,6 +45,7 @@ export const TarotProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         title: readingStep === 'first' ? 'Situação' : readingStep === 'second' ? 'Desafio' : 'Conselho'
       };
       
+      setCurrentCard(newCard);
       setSelectedCards(prev => [...prev, newCard]);
       
       if (readingStep === 'third') {
@@ -54,6 +57,7 @@ export const TarotProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [readingStep]);
 
   const proceedToNextStep = useCallback(() => {
+    setCurrentCard(null);
     setReadingStep(current => {
       switch (current) {
         case 'first':
@@ -69,6 +73,7 @@ export const TarotProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const resetConsultation = useCallback(() => {
     setReadingStep('first');
     setSelectedCards([]);
+    setCurrentCard(null);
     const shuffledCards = shuffleArray([...tarotCards]);
     setCards(shuffledCards);
   }, []);
@@ -78,7 +83,8 @@ export const TarotProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{ 
         cards, 
         readingStep, 
-        selectedCards, 
+        selectedCards,
+        currentCard,
         startConsultation, 
         selectCard, 
         proceedToNextStep,

@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTarot } from '../context/TarotContext';
 
 const RevealedCard: React.FC = () => {
-  const { selectedCards, readingStep, proceedToNextStep } = useTarot();
+  const { currentCard, readingStep, proceedToNextStep } = useTarot();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isFullyRevealed, setIsFullyRevealed] = useState(false);
-  const currentCard = selectedCards[selectedCards.length - 1];
 
   useEffect(() => {
     if (currentCard) {
