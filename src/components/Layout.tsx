@@ -7,15 +7,15 @@ import ReadingResult from './ReadingResult';
 import StarryBackground from './StarryBackground';
 
 const Layout: React.FC = () => {
-  const { readingStep } = useTarot();
+  const { readingStep, selectedCards } = useTarot();
 
   return (
     <div className="layout">
       <StarryBackground />
       <div className="content">
         {readingStep === 'initial' && <HomePage />}
-        {['first', 'second', 'third'].includes(readingStep) && !selectedCards.length && <TarotDeck />}
-        {['first', 'second', 'third'].includes(readingStep) && selectedCards.length > 0 && <RevealedCard />}
+        {['first', 'second', 'third'].includes(readingStep) && !selectedCards?.length && <TarotDeck />}
+        {['first', 'second', 'third'].includes(readingStep) && selectedCards?.length > 0 && <RevealedCard />}
         {readingStep === 'result' && <ReadingResult />}
       </div>
     </div>
